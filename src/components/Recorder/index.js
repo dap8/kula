@@ -28,18 +28,16 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
   },
+  menu: {
+    justifyContent: 'center',
+  },
   preview: {
     flex: 1,
     justifyContent: 'flex-end',
-    alignItems: 'center',
   },
   capture: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 100,
-    height: 100,
     position: 'absolute',
-    zIndex: 1,
+    alignSelf: 'center',
   },
   icon: {
     color: '#ffffff',
@@ -47,28 +45,29 @@ const styles = StyleSheet.create({
   },
   split: {
     borderBottomColor: 'black',
-    borderBottomWidth: height,
+    borderBottomWidth: height * 3,
     width: 2,
-    zIndex: 0,
+    position: 'absolute',
+    alignSelf: 'center',
   },
   zoom: {
-    alignContent: 'flex-end',
-    alignItems: 'flex-end',
-    zIndex: 1,
     color: '#ffffff',
     fontSize: 40,
-    position: 'absolute',
-    paddingLeft: width / 1.5,
-    paddingBottom: 20,
+    alignSelf: 'center',
+    marginLeft: 250,
   },
 });
 
 const DEFAULT_ZOOM = 12; // Does not equal a zoom of 1.2
+let PINCH_INTERVAL;
 export default class Recorder extends Component {
   constructor() {
     super();
-    this.state = { zoom: DEFAULT_ZOOM };
-    //console.log(this.camera);
+    this.state = {
+      zoom: DEFAULT_ZOOM,
+      pinching: false,
+    };
+    // this.pinchListener();
   }
 
   componentDidMount() {
@@ -82,18 +81,24 @@ export default class Recorder extends Component {
 
   takePicture() {
     const options = {};
-    //options.location = ...
-    console.log(this.camera.props.onZoomChanged);
-
-    this.camera.getZoom({ metadata: {} })
+    this.camera.capture({ metadata: options })
       .then(data => console.log(data))
       .catch(err => console.error(err));
-    /* this.camera.capture({ metadata: options })
-      .then((data) => console.log(data))
-      .catch(err => console.error(err)); */
+  }
+/*
+  startPinch() {
+    console.log('started pinch');
+    this.updateZoom();
+    PINCH_INTERVAL = setInterval(this.updateZoom.bind(this), 1);
   }
 
+  endPinch() {
+    console.log('ended pinch');
+    clearInterval(PINCH_INTERVAL);
+  }
+*/
   updateZoom() {
+    console.log('update zoom');
     this.camera.getZoom({ metadata: {} })
       .then((zoom) => {
         if (zoom >= 0) {
@@ -107,7 +112,7 @@ export default class Recorder extends Component {
     return (
       <View style={styles.container}>
         <TouchableWithoutFeedback
-          onPress={() => { console.log('pressed'); this.updateZoom(); }}
+          onPress={() => this.updateZoom()}
         >
           <Camera
             ref={(cam) => {
@@ -115,21 +120,22 @@ export default class Recorder extends Component {
             }}
             onBarCodeRead={this.onBarCodeRead.bind(this)}
             style={styles.preview}
-            aspect={Camera.constants.Aspect.fill}>
-            <Text style={styles.zoom}>{this.state.zoom}x</Text>
-            <TouchableOpacity
-              style={styles.capture}
-              onPress={this.takePicture.bind(this)}
-            >
-              <Text>
-                <FontAwesome style={styles.icon}>{Icons.camera}</FontAwesome>
-              </Text>
-            </TouchableOpacity>
-            
-            <View style={styles.split} >
+            aspect={Camera.constants.Aspect.fill}
+          >
+            <View style={styles.menu}>
+              <TouchableOpacity
+                style={styles.capture}
+                onPress={this.takePicture.bind(this)}
+              >
+                <Text>
+                  <FontAwesome style={styles.icon}>{Icons.camera}</FontAwesome>
+                </Text>
+              </TouchableOpacity>
+              <View style={styles.split} />
+              <Text style={styles.zoom}>{this.state.zoom}x</Text>
             </View>
           </Camera>
-          </TouchableWithoutFeedback>
+        </TouchableWithoutFeedback>
       </View>
     );
   }
