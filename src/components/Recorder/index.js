@@ -9,7 +9,6 @@ import {
   StyleSheet,
   Text,
   View,
-  TouchableHighlight,
   TouchableOpacity,
   Dimensions,
   TouchableWithoutFeedback,
@@ -18,10 +17,7 @@ import Camera from 'react-native-camera';
 import FontAwesome, { Icons } from 'react-native-fontawesome';
 import { setTimeout } from 'core-js/library/web/timers';
 
-const { width, height } = Dimensions.get('window');
-
-console.log('width is: ', width);
-console.log('height is: ', height);
+const { height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -58,16 +54,13 @@ const styles = StyleSheet.create({
   },
 });
 
-const DEFAULT_ZOOM = 12; // Does not equal a zoom of 1.2
-let PINCH_INTERVAL;
+const DEFAULT_ZOOM = 12; // TODO: Find a integer value that equals 1.2x zoom on samsung camera app
 export default class Recorder extends Component {
   constructor() {
     super();
     this.state = {
       zoom: DEFAULT_ZOOM,
-      pinching: false,
     };
-    // this.pinchListener();
   }
 
   componentDidMount() {
@@ -76,29 +69,23 @@ export default class Recorder extends Component {
   }
 
   onBarCodeRead(e) {
-    console.log('Barcode Found!', 'Type: ' + e.type + '\nData: ' + e.data);
+    // Handle barcode read here
   }
 
+  /**
+  * Takes a picture using the exported function capture, the picture is saved to camera roll and
+  * the file path of the picture is logged
+  */
   takePicture() {
     const options = {};
     this.camera.capture({ metadata: options })
       .then(data => console.log(data))
       .catch(err => console.error(err));
   }
-/*
-  startPinch() {
-    console.log('started pinch');
-    this.updateZoom();
-    PINCH_INTERVAL = setInterval(this.updateZoom.bind(this), 1);
-  }
-
-  endPinch() {
-    console.log('ended pinch');
-    clearInterval(PINCH_INTERVAL);
-  }
-*/
+  /**
+  * Updates the zoom state using a zoom value that is acquired using the exported function getZoom
+  */
   updateZoom() {
-    console.log('update zoom');
     this.camera.getZoom({ metadata: {} })
       .then((zoom) => {
         if (zoom >= 0) {
